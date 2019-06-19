@@ -1,10 +1,10 @@
 syntax = "proto3";
 
 package todo;
-option go_package ="todopb";
+option go_package ="pb";
 
 message TodoMessage {
-    string task = 1;
+    string title = 1;
     bool done = 2;
 }
 
@@ -19,6 +19,6 @@ message TodoResponse {
 message Empty {}
 
 service TodoService {
-    rpc AddTask (TodoRequest) returns (TodoMessage);
+    rpc AddTask (TodoRequest) returns (TodoRequest);
     rpc ListTasks (Empty) returns (TodoResponse);
 }
