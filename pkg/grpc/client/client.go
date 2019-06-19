@@ -1,4 +1,5 @@
 // Client Example
+// Client created mainly for testing gRPC Server and connection to database
 package main
 
 import (
@@ -6,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/joaoh82/shelltodo/pb"
 	"google.golang.org/grpc"
@@ -14,13 +16,44 @@ import (
 const (
 	// "list"
 	// "add"
-	command = "list"
-	addr    = "localhost:50051"
+	// command = "list"
+	addr = "localhost:50051"
+	help = `
+help:
+  client add <title> <done>
+  client list
+`
 )
 
 func main() {
-	title := "buy chicken"
-	done := false
+	// testing data
+	// title := "buy chicken"
+	// done := false
+	var command, title string
+	var done bool
+
+	if len(os.Args) < 2 {
+		fmt.Println(help)
+		os.Exit(1)
+	}
+
+	command = os.Args[1]
+
+	if command == "add" {
+		if len(os.Args) != 4 {
+			fmt.Println(help)
+			os.Exit(1)
+		}
+
+		title = os.Args[2]
+		done, err := strconv.ParseBool(os.Args[3])
+		if err != nil {
+			fmt.Printf("done Type no correct: %T \n", done)
+			fmt.Println(help)
+			os.Exit(1)
+		}
+		// done = os.Args[3]
+	}
 
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
@@ -57,7 +90,7 @@ func main() {
 		}
 
 	default:
-		fmt.Println(usage)
+		fmt.Println(help)
 		os.Exit(1)
 	}
 }
