@@ -16,11 +16,6 @@ const (
 	// "add"
 	command = "list"
 	addr    = "localhost:50051"
-	usage   = `
-usage:
-  client add <title> <done>
-  client list
-`
 )
 
 func main() {
@@ -45,7 +40,6 @@ func main() {
 		}
 
 		_, err = client.AddTask(context.Background(), task)
-
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -54,7 +48,6 @@ func main() {
 
 	case "list":
 		tasks, err := client.ListTasks(context.Background(), &pb.Empty{})
-
 		if err != nil {
 			log.Fatal(err)
 		}
