@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package todo;
+option go_package ="todopb";
+
+message TodoMessage {
+    string task = 1;
+    bool done = 2;
+}
+
+message TodoRequest {
+    TodoMessage task = 1;
+}
+
+message TodoResponse {
+    repeated TodoMessage Tasks = 1;
+}
+
+message Empty {}
+
+service TodoService {
+    rpc AddTask (TodoRequest) returns (TodoMessage);
+    rpc ListTasks (Empty) returns (TodoResponse);
+}
