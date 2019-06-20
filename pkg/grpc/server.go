@@ -21,6 +21,7 @@ var tasksDB = []Task{
 	Task{"get eggs", false},
 	Task{"fill car with gas", false},
 	Task{"pay electric bill", false},
+	Task{"test task", true},
 }
 
 type todoServer struct {
