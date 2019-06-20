@@ -36,7 +36,7 @@ ListTasks
 
 **Dependencies:**
 * Go - https://golang.org/doc/install
-* PostgreSQL DB
+* PostgreSQL DB - Create DB called `grpc_todo`
 * Protoc Setup - In order to perform code generation, you will need to install protoc on your computer. - 
 On Mac 
 ```
