@@ -84,6 +84,6 @@ func RunServer() {
 		DB: db,
 	})
 
-	fmt.Println("=====> Server started.")
+	fmt.Printf("gRPC Server started at port %v", port)
 	s.Serve(lis)
 }
