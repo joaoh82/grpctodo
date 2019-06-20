@@ -46,6 +46,7 @@ func AddTasksHandler(c *gin.Context) {
 	var task pb.TodoMessage
 	// Binding body into custom struct
 	if c.ShouldBind(&task) == nil {
+		// Logging added for debugging purposes.
 		log.Println(task.Title)
 		log.Println(task.Done)
 	}
