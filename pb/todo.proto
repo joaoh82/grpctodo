@@ -1,6 +1,8 @@
 syntax = "proto3";
 
 package todo;
+// this option helps in the code generation, changing the package name of the generated file
+// to whatever you specify,
 option go_package ="pb";
 
 message TodoMessage {
@@ -16,6 +18,7 @@ message TodoResponse {
     repeated TodoMessage Tasks = 1;
 }
 
+// Empty Message to be used when no Message is required.
 message Empty {}
 
 service TodoService {

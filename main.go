@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	// Running gRPC Server on a new goroutine, so it does not block the application
 	go grpc.RunServer()
 
 	r := httprouter.SetupRouter()

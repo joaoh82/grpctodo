@@ -3,7 +3,6 @@ package httprouter
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -19,6 +18,7 @@ func SetupRouter() *gin.Engine {
 	// Setup route group for the API
 	api := router.Group("/api/v1")
 	{
+		// This endpoint could might as well be a health check
 		api.GET("/", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"message": "pong",
@@ -34,6 +34,8 @@ func SetupRouter() *gin.Engine {
 
 func AddTasksHandler(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
+
+	// Creating connection with gRPC Server
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
@@ -41,19 +43,22 @@ func AddTasksHandler(c *gin.Context) {
 	defer conn.Close()
 
 	client := pb.NewTodoServiceClient(conn)
-
 	var task pb.TodoMessage
+	// Binding body into custom struct
 	if c.ShouldBind(&task) == nil {
 		log.Println(task.Title)
 		log.Println(task.Done)
 	}
-	task2 := &pb.TodoRequest{
+	taskRequest := &pb.TodoRequest{
 		Task: &task,
 	}
 
-	_, err = client.AddTask(context.Background(), task2)
+	//
+	_, err = client.AddTask(context.Background(), taskRequest)
 	if err != nil {
 		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -64,6 +69,7 @@ func AddTasksHandler(c *gin.Context) {
 func ListTasksHandler(c *gin.Context) {
 	c.Header("Content-Type", "application/json")
 
+	// Creating connection with gRPC Server
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
@@ -71,15 +77,17 @@ func ListTasksHandler(c *gin.Context) {
 	defer conn.Close()
 
 	client := pb.NewTodoServiceClient(conn)
-
 	tasks, err := client.ListTasks(context.Background(), &pb.Empty{})
 	if err != nil {
 		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	response, err := json.Marshal(tasks)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
+		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
 

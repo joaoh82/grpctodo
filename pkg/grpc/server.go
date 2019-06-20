@@ -19,7 +19,6 @@ type todoServer struct {
 
 func (s *todoServer) AddTask(ctx context.Context, req *pb.TodoRequest) (*pb.TodoRequest, error) {
 	_, err := s.DB.Exec("INSERT INTO todos(title, done) VALUES($1, $2)", req.GetTask().Title, req.GetTask().Done)
-
 	if err != nil {
 		return nil, err
 	}
@@ -35,14 +34,12 @@ func (s *todoServer) ListTasks(ctx context.Context, req *pb.Empty) (*pb.TodoResp
 	)
 
 	rows, err := s.DB.Query("SELECT title, done FROM todos")
-
 	if err != nil {
 		return nil, err
 	}
 
 	for rows.Next() {
 		err = rows.Scan(&title, &done)
-
 		if err != nil {
 			return nil, err
 		}
@@ -69,19 +66,15 @@ const (
 
 func RunServer() {
 	lis, err := net.Listen("tcp", port)
-
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
 	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName))
-
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	_, err = db.Exec("CREATE TABLE IF NOT EXISTS todos (title varchar(50), done BOOLEAN)")
-
 	if err != nil {
 		log.Fatal(err)
 	}
