@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log"
 	"net"
@@ -13,15 +12,26 @@ import (
 	"google.golang.org/grpc"
 )
 
-type todoServer struct {
-	DB *sql.DB
+type Task struct {
+	title string `json:"title" binding:"required"`
+	done  bool   `json:"done" binding:"required"`
 }
 
+var tasksDB = []Task{
+	Task{"get eggs", false},
+	Task{"fill car with gas", false},
+	Task{"pay electric bill", false},
+}
+
+type todoServer struct {
+}
+
+const (
+	port = ":50051"
+)
+
 func (s *todoServer) AddTask(ctx context.Context, req *pb.TodoRequest) (*pb.TodoRequest, error) {
-	_, err := s.DB.Exec("INSERT INTO todos(title, done) VALUES($1, $2)", req.GetTask().Title, req.GetTask().Done)
-	if err != nil {
-		return nil, err
-	}
+	tasksDB = append(tasksDB, Task{req.GetTask().Title, req.GetTask().Done})
 
 	return req, nil
 }
@@ -29,24 +39,12 @@ func (s *todoServer) AddTask(ctx context.Context, req *pb.TodoRequest) (*pb.Todo
 func (s *todoServer) ListTasks(ctx context.Context, req *pb.Empty) (*pb.TodoResponse, error) {
 	var (
 		tasks []*pb.TodoMessage
-		title string
-		done  bool
 	)
 
-	rows, err := s.DB.Query("SELECT title, done FROM todos")
-	if err != nil {
-		return nil, err
-	}
-
-	for rows.Next() {
-		err = rows.Scan(&title, &done)
-		if err != nil {
-			return nil, err
-		}
-
+	for _, v := range tasksDB {
 		tasks = append(tasks, &pb.TodoMessage{
-			Title: title,
-			Done:  done,
+			Title: v.title,
+			Done:  v.done,
 		})
 	}
 
@@ -55,34 +53,14 @@ func (s *todoServer) ListTasks(ctx context.Context, req *pb.Empty) (*pb.TodoResp
 	}, nil
 }
 
-const (
-	dbHost     = "localhost"
-	dbName     = "grpc_todo"
-	dbPassword = "1234"
-	dbPort     = "5432"
-	dbUser     = "postgres"
-	port       = ":50051"
-)
-
 func RunServer() {
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	db, err := sql.Open("postgres", fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbUser, dbPassword, dbHost, dbPort, dbName))
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS todos (title varchar(50), done BOOLEAN)")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	s := grpc.NewServer()
-	pb.RegisterTodoServiceServer(s, &todoServer{
-		DB: db,
-	})
+	pb.RegisterTodoServiceServer(s, &todoServer{})
 
 	fmt.Printf("gRPC Server started at port %v", port)
 	s.Serve(lis)
