@@ -57,7 +57,7 @@ protoc pg/todo.proto --go_out=plugins=grpc:.
 
 **TODO:**
 
-* Create DB/Repository Package and abstract DB action out of API layer. One of the reasons for this is that it would make it easier to test every component separately.
+* Create DB/Repository Package and abstract DB action out of API layer. One of the reasons for this is that it would make it easier to test every component separately. Also because it separates responsabilities.
 * Write Tests for gRPC, RESTful and Repository
 * Implement proper logging
 * Implement proper error handling
